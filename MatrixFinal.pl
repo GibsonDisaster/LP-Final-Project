@@ -1,3 +1,5 @@
+:- use_module(library(clpfd)).
+
 /*
 element/4 retrieves an element from the matrix at a given row and column position
 R1 - Number of rows in given matrix (used to verify element will exist)
@@ -45,3 +47,24 @@ scalar_helper([H|T], S, RS, RR) :-
 /*
 Create the square identity matrix of a given dimension
 */
+create_sqr_identity(D, M) :- 
+  create_row(D, [], R),
+  sqr_helper(D, R, [], MM),
+  msort(MM, Ms),
+  append(Ms, [D, D], Ms1),
+  reverse(Ms1, M).
+
+sqr_helper(0, L, MM, MM).
+sqr_helper(D, L, MM, M) :-
+  shuffle_to_back(L, L1),
+  append([L1], MM, M1),
+  D1 is D - 1,
+  sqr_helper(D1, L1, M1, M).
+
+create_row(1, Collector, R) :- append(Collector, [1], R), !.
+create_row(N, Collector, R) :-
+  append([0], Collector, R1),
+  N1 is N - 1,
+  create_row(N1, R1, R).
+
+shuffle_to_back([H|T], R) :- append(T, [H], R).
