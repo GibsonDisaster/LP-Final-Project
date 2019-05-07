@@ -1,6 +1,12 @@
 :- use_module(library(clpfd)).
 
 /*
+Matrix - [Rows Cols [...] [...] ...]
+
+Vector - [X Y Z ...]
+*/
+
+/*
 element/4 retrieves an element from the matrix at a given row and column position
 R1 - Number of rows in given matrix (used to verify element will exist)
 C1 - Number of columns in given matrix (used to verify element will exist)
@@ -47,14 +53,14 @@ scalar_helper([H|T], S, RS, RR) :-
 /*
 Create the square identity matrix of a given dimension
 */
-create_sqr_identity(D, M) :- 
+identity(D, M) :- 
   create_row(D, [], R),
   sqr_helper(D, R, [], MM),
   msort(MM, Ms),
   append(Ms, [D, D], Ms1),
   reverse(Ms1, M).
 
-sqr_helper(0, L, MM, MM).
+sqr_helper(0, _, MM, MM).
 sqr_helper(D, L, MM, M) :-
   shuffle_to_back(L, L1),
   append([L1], MM, M1),
@@ -68,3 +74,15 @@ create_row(N, Collector, R) :-
   create_row(N1, R1, R).
 
 shuffle_to_back([H|T], R) :- append(T, [H], R).
+
+% Dot product of two vectors
+dot([],[], 0).
+dot([H1|T1], [H2|T2], Result) :-
+  Sum is H1 + H2,
+  dot(T1, T2, Result1),
+  Result is Sum + Result1.
+
+det_of_2x2([2, 2, [A1, B1|[]], [A2, B2|[]]], Det) :-
+  Diag1 is A1 * B2,
+  Diag2 is A2 * B1,
+  Det is Diag1 - Diag2, !.
