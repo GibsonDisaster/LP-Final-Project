@@ -33,8 +33,21 @@ getrow([_|T], R, E) :-
   R1 is R - 1,
   getrow(T, R1, E).
 
+getcol(ColNumber, Matrix, Col) :- getcolhelper(ColNumber, Matrix, [], Col).
+
+getcolhelper(_, [], Collector, Collector) :- !.
+getcolhelper(ColNumber, [CurrentRow|Rest], Collector, Col) :-
+  nth0(ColNumber, CurrentRow, CurrentEntry),
+  append(Collector, [CurrentEntry], NewCollector),
+  getcolhelper(ColNumber, Rest, NewCollector, Col).
+
 /*
 Multiply a matrix by a scalar
+R - Number of rows in matrix
+C - Number of columns in matrix
+T - Rows of the matrix
+S - Scalar to multiply matrix
+MS - Scalar multiplied matrix
 */
 scalar_multiply([R, C|T], S, MS) :- scalar_mul_helper(T, S, [], MS1), append([R, C], MS1, MS).
 
@@ -52,6 +65,8 @@ scalar_helper([H|T], S, RS, RR) :-
 
 /*
 Create the square identity matrix of a given dimension
+D - Size of identity matrix
+M - Identity matrix of size D
 */
 identity(D, M) :- 
   create_row(D, [], R),
@@ -75,14 +90,56 @@ create_row(N, Collector, R) :-
 
 shuffle_to_back([H|T], R) :- append(T, [H], R).
 
-% Dot product of two vectors
+/*
+Dot product of two vectors
+H1 - First entry of first vector
+T1 - Rest of first vector
+H2 - First entry of second vector
+T2 - Rest of second vector
+Result - Dot product of the two vectors
+*/
 dot([],[], 0).
 dot([H1|T1], [H2|T2], Result) :-
-  Sum is H1 + H2,
+  Product is H1 * H2,
   dot(T1, T2, Result1),
-  Result is Sum + Result1.
+  Result is Product + Result1.
 
+/*
+Determinate of a 2x2 matrix
+A1 - Top left entry
+A2 - Top right entry
+B1 - Bottom left entry
+B2 - Bottom right entry
+*/
 det_of_2x2([2, 2, [A1, B1|[]], [A2, B2|[]]], Det) :-
   Diag1 is A1 * B2,
   Diag2 is A2 * B1,
   Det is Diag1 - Diag2, !.
+
+/*
+Matrix Multiplication
+currently repeats first column but the rest is normal?
+*/
+matrix_mul([Rows, _ | M1], [_, C | M2], R) :- for_each_col(M1, M2, Rows, 0, [], Result), clump_up(C, Result, Cols), transpose(Cols, Cols2), append([Rows, C], Cols2, R), !.%mul_helper2(M1, M2, 0, [], R1), mul_helper2(M1, M2, 1, R1, R2), mul_helper2(M1, M2, 2, R2, R).
+
+for_each_col(_, _, Rows, Rows, Collector, Collector).
+for_each_col(M1, M2, Times, Position, Collector, R) :-
+  mul_helper2(M1, M2, Position, Collector, R1),
+  Pos is Position + 1,
+  for_each_col(M1, M2, Times, Pos, R1, R).
+
+mul_helper2([], _, _, Collector, Collector).
+mul_helper2([R|Rest], Matrix2, ColCounter, Collector, Result) :-
+  getcol(ColCounter, Matrix2, Col),
+  dot(R, Col, Dot),
+  append(Collector, [Dot], NewCollector),
+  mul_helper2(Rest, Matrix2, ColCounter, NewCollector, Result).
+
+clump_up(_, [], []) :- !.
+clump_up(Size, List, NewList) :- 
+  length(X, Size),
+  append(X, Y, List),
+  clump_up(Size, Y, Rest),
+  append([X], Rest, NewList).
+
+cols_to_rows().
