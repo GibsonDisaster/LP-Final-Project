@@ -117,8 +117,16 @@ det_of_2x2([2, 2, [A1, B1|[]], [A2, B2|[]]], Det) :-
   Det is Diag1 - Diag2, !.
 
 /*
+Determinate of an nxn square matrix
+*/
+
+/*
 Matrix Multiplication
-currently repeats first column but the rest is normal?
+Rows - Number of rows in first matrix
+M1 - First matrix
+C - Number of columns in second matrix
+M2 - Second matrix
+R - Result
 */
 matrix_mul([Rows, _ | M1], [_, C | M2], R) :- for_each_col(M1, M2, Rows, 0, [], Result), clump_up(C, Result, Cols), transpose(Cols, Cols2), append([Rows, C], Cols2, R), !.%mul_helper2(M1, M2, 0, [], R1), mul_helper2(M1, M2, 1, R1, R2), mul_helper2(M1, M2, 2, R2, R).
 
@@ -141,5 +149,3 @@ clump_up(Size, List, NewList) :-
   append(X, Y, List),
   clump_up(Size, Y, Rest),
   append([X], Rest, NewList).
-
-cols_to_rows().
