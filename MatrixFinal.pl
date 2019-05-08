@@ -1,5 +1,7 @@
 :- use_module(library(clpfd)).
 
+test_matrix1([2,2,[1,2], [3,4]]).
+
 /*
 Matrix - [Rows Cols [...] [...] ...]
 
@@ -149,3 +151,22 @@ clump_up(Size, List, NewList) :-
   append(X, Y, List),
   clump_up(Size, Y, Rest),
   append([X], Rest, NewList).
+
+matrix_print([R, C | M]) :-
+  write(R),
+  write('x'),
+  writeln(C),
+  writeln(''),
+  print_rows(M).
+
+print_rows([]) :- writeln('').
+print_rows([R | T]) :-
+  print_elements(R),
+  print_rows(T).
+
+print_elements([E | []]) :- write(E), writeln('|').
+print_elements([E | T]) :-
+  write('|'),
+  write(E),
+  write(' '),
+  print_elements(T).
