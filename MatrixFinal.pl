@@ -75,7 +75,7 @@ identity(D, M) :-
   sqr_helper(D, R, [], MM),
   msort(MM, Ms),
   append(Ms, [D, D], Ms1),
-  reverse(Ms1, M).
+  reverse(Ms1, M), !.
 
 sqr_helper(0, _, MM, MM).
 sqr_helper(D, L, MM, M) :-
@@ -152,6 +152,47 @@ clump_up(Size, List, NewList) :-
   clump_up(Size, Y, Rest),
   append([X], Rest, NewList).
 
+/*
+Matrix Subtraction
+R - Number of rows in both matrices
+C - Number of columns in both matrices
+M1 - First matrix
+M2 - Second matrix
+Result - Result of matrix subtraction
+*/
+matrix_sub([R, C|M1], [R, C|M2], [R, C|Result]) :- sub_helper(M1, M2, Result1), clump_up(2, Result1, Result).
+
+sub_helper([], [], []).
+sub_helper([R1|T1], [R2|T2], Result) :-
+  sub_row(R1, R2, SubbedRows),
+  sub_helper(T1, T2, Result1),
+  append(SubbedRows, Result1, Result).
+
+sub_row([], [], []).
+sub_row([E1|R1], [E2|R2], Result) :-
+  E is E1 - E2,
+  sub_row(R1, R2, Result1),
+  append([E], Result1, Result).
+
+/*
+Vector normalization
+V - Vector to normalize
+N - Result of normalizing the vector
+*/
+norm(V, N) :- norm_helper(V, 0, N).
+
+norm_helper([], Collector, N) :- N is sqrt(Collector).
+norm_helper([H|T], Collector, N) :-
+  Sqr is H*H,
+  Collector1 is Collector + Sqr,
+  norm_helper(T, Collector1, N).
+
+/*
+Matrix print
+R - Number of rows in Matrix
+C - Number of columns in Matrix
+M - Matrix
+*/
 matrix_print([R, C | M]) :-
   write(R),
   write('x'),
