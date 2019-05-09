@@ -119,6 +119,13 @@ det_of_2x2([2, 2, [A1, B1|[]], [A2, B2|[]]], Det) :-
   Det is Diag1 - Diag2, !.
 
 /*
+Determinate of a 3x3 matrix
+M - Matrix
+*/
+det_of_3x3([3, 3 | M], Det) :-
+  throw("not implemented yet").
+
+/*
 Determinate of an nxn square matrix
 */
 
@@ -130,7 +137,7 @@ C - Number of columns in second matrix
 M2 - Second matrix
 R - Result
 */
-matrix_mul([Rows, _ | M1], [_, C | M2], R) :- for_each_col(M1, M2, Rows, 0, [], Result), clump_up(C, Result, Cols), transpose(Cols, Cols2), append([Rows, C], Cols2, R), !.%mul_helper2(M1, M2, 0, [], R1), mul_helper2(M1, M2, 1, R1, R2), mul_helper2(M1, M2, 2, R2, R).
+matrix_mul([Rows, _ | M1], [_, C | M2], R) :- for_each_col(M1, M2, Rows, 0, [], Result), clump_up(C, Result, Cols), transpose(Cols, Cols2), append([Rows, C], Cols2, R), !.
 
 for_each_col(_, _, Rows, Rows, Collector, Collector).
 for_each_col(M1, M2, Times, Position, Collector, R) :-
@@ -205,9 +212,8 @@ print_rows([R | T]) :-
   print_elements(R),
   print_rows(T).
 
-print_elements([E | []]) :- write(E), writeln('|').
+print_elements([E | []]) :- writeln(E).
 print_elements([E | T]) :-
-  write('|'),
   write(E),
   write(' '),
   print_elements(T).
