@@ -182,6 +182,28 @@ sub_row([E1|R1], [E2|R2], Result) :-
   append([E], Result1, Result).
 
 /*
+Matrix Addition
+R - Number of rows in both matrices
+C - Number of columns in both matrices
+M1 - First matrix
+M2 - Second matrix
+Result - Result of matrix subtraction
+*/
+matrix_add([R, C|M1], [R, C|M2], [R, C|Result]) :- add_helper(M1, M2, Result1), clump_up(2, Result1, Result).
+
+add_helper([], [], []).
+add_helper([R1|T1], [R2|T2], Result) :-
+  add_row(R1, R2, AddedRows),
+  add_helper(T1, T2, Result1),
+  append(AddedRows, Result1, Result).
+
+add_row([], [], []).
+add_row([E1|R1], [E2|R2], Result) :-
+  E is E1 + E2,
+  add_row(R1, R2, Result1),
+  append([E], Result1, Result).
+
+/*
 Vector normalization
 V - Vector to normalize
 N - Result of normalizing the vector
@@ -217,3 +239,5 @@ print_elements([E | T]) :-
   write(E),
   write(' '),
   print_elements(T).
+
+inverse_of_2x2([2, 2, [A, C], [B, D]], [2, 2, [D, -C], [-B, A]]).
