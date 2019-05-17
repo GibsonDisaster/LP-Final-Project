@@ -1,6 +1,7 @@
 :- use_module(library(clpfd)).
 
 test_matrix1([2,2,[1,2], [3,4]]).
+test_vector([1,2,3]).
 
 /*
 Matrix - [Rows Cols [...] [...] ...]
@@ -187,7 +188,7 @@ R - Number of rows in both matrices
 C - Number of columns in both matrices
 M1 - First matrix
 M2 - Second matrix
-Result - Result of matrix subtraction
+Result - Result of matrix addition
 */
 matrix_add([R, C|M1], [R, C|M2], [R, C|Result]) :- add_helper(M1, M2, Result1), clump_up(2, Result1, Result).
 
@@ -202,6 +203,48 @@ add_row([E1|R1], [E2|R2], Result) :-
   E is E1 + E2,
   add_row(R1, R2, Result1),
   append([E], Result1, Result).
+
+/*
+Vector Multiplication
+V1 - First vector
+V2 - Second vector
+V3 - Resulting vector
+*/
+vect_mul(V1, V2, V3) :- vect_mul_helper(V1, V2, [], V3).
+
+vect_mul_helper([],[], Collector, Collector).
+vect_mul_helper([X|T], [Y|T2], Collector, R) :-
+  M is X*Y,
+  append(Collector, [M], Collector1),
+  vect_mul_helper(T, T2, Collector1, R).
+
+/*
+Vector Addition
+V1 - First vector
+V2 - Second vector
+V3 - Resulting vector
+*/
+vect_add(V1, V2, V3) :- vect_add_helper(V1, V2, [], V3).
+
+vect_add_helper([],[], Collector, Collector).
+vect_add_helper([X|T], [Y|T2], Collector, R) :-
+  M is X+Y,
+  append(Collector, [M], Collector1),
+  vect_add_helper(T, T2, Collector1, R).
+
+/*
+Vector Subtraction
+V1 - First vector
+V2 - Second vector
+V3 - Resulting vector
+*/
+vect_sub(V1, V2, V3) :- vect_sub_helper(V1, V2, [], V3).
+
+vect_sub_helper([],[], Collector, Collector).
+vect_sub_helper([X|T], [Y|T2], Collector, R) :-
+  M is X+Y,
+  append(Collector, [M], Collector1),
+  vect_sub_helper(T, T2, Collector1, R).
 
 /*
 Vector normalization
