@@ -4,6 +4,10 @@ test_matrix1([2,2,[1,2], [3,4]]).
 test_vector([1,2,3]).
 
 /*
+FIX INVERSE OF A 2x2 matrix, multiply the current output by the determinant.
+*/
+
+/*
 Matrix - [Rows Cols [...] [...] ...]
 
 Vector - [X Y Z ...]
@@ -138,7 +142,11 @@ C - Number of columns in second matrix
 M2 - Second matrix
 R - Result
 */
-matrix_mul([Rows, _ | M1], [_, C | M2], R) :- for_each_col(M1, M2, Rows, 0, [], Result), clump_up(C, Result, Cols), transpose(Cols, Cols2), append([Rows, C], Cols2, R), !.
+matrix_mul([Rows, _ | M1], [_, C | M2], R) :- 
+  for_each_col(M1, M2, Rows, 0, [], Result),
+  clump_up(C, Result, Cols),
+  transpose(Cols, Cols2),
+  append([Rows, C], Cols2, R), !.
 
 for_each_col(_, _, Rows, Rows, Collector, Collector).
 for_each_col(M1, M2, Times, Position, Collector, R) :-
@@ -168,7 +176,9 @@ M1 - First matrix
 M2 - Second matrix
 Result - Result of matrix subtraction
 */
-matrix_sub([R, C|M1], [R, C|M2], [R, C|Result]) :- sub_helper(M1, M2, Result1), clump_up(2, Result1, Result).
+matrix_sub([R, C|M1], [R, C|M2], [R, C|Result]) :-
+  sub_helper(M1, M2, Result1),
+  clump_up(2, Result1, Result).
 
 sub_helper([], [], []).
 sub_helper([R1|T1], [R2|T2], Result) :-
@@ -190,7 +200,9 @@ M1 - First matrix
 M2 - Second matrix
 Result - Result of matrix addition
 */
-matrix_add([R, C|M1], [R, C|M2], [R, C|Result]) :- add_helper(M1, M2, Result1), clump_up(2, Result1, Result).
+matrix_add([R, C|M1], [R, C|M2], [R, C|Result]) :-
+  add_helper(M1, M2, Result1),
+  clump_up(2, Result1, Result).
 
 add_helper([], [], []).
 add_helper([R1|T1], [R2|T2], Result) :-
@@ -284,3 +296,35 @@ print_elements([E | T]) :-
   print_elements(T).
 
 inverse_of_2x2([2, 2, [A, C], [B, D]], [2, 2, [D, -C], [-B, A]]).
+
+list_tuple([A,B,C|L], (A, R)) :- 
+  R = (B, _), !, 
+  list_tuple([B,C|L], R). 
+list_tuple([A,B], (A,B)).
+
+load_matrix(FileName, Matrix) :-
+  main(FileName, LoadedFile),
+  get_size(LoadedFile, R, C, Rest),
+  get_rows(Rest, [], Rows),
+  append([R, C], Rows, Matrix).
+
+get_size([(R, C) | T], R, C, T).
+
+get_rows([], Collector, Collector).
+get_rows([H|T], Collector, Rows) :-
+  list_tuple(L, H),
+  append(Collector, [L], Collector1),
+  get_rows(T, Collector1, Rows).
+
+main(File, Lines) :-
+    open(File, read, Str),
+    read_file(Str,Lines),
+    close(Str).
+
+read_file(Stream,[]) :-
+    at_end_of_stream(Stream).
+
+read_file(Stream,[X|L]) :-
+    \+ at_end_of_stream(Stream),
+    read(Stream,X),
+    read_file(Stream,L).
