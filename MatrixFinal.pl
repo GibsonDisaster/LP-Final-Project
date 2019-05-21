@@ -4,10 +4,6 @@ test_matrix1([2,2,[1,2], [3,4]]).
 test_vector([1,2,3]).
 
 /*
-FIX INVERSE OF A 2x2 matrix, multiply the current output by the determinant.
-*/
-
-/*
 Matrix - [Rows Cols [...] [...] ...]
 
 Vector - [X Y Z ...]
@@ -124,17 +120,6 @@ det_of_2x2([2, 2, [A1, B1|[]], [A2, B2|[]]], Det) :-
   Det is Diag1 - Diag2, !.
 
 /*
-Determinate of a 3x3 matrix
-M - Matrix
-*/
-det_of_3x3([3, 3 | M], Det) :-
-  throw("not implemented yet").
-
-/*
-Determinate of an nxn square matrix
-*/
-
-/*
 Matrix Multiplication
 Rows - Number of rows in first matrix
 M1 - First matrix
@@ -224,6 +209,14 @@ V3 - Resulting vector
 */
 vect_mul(V1, V2, V3) :- vect_mul_helper(V1, V2, [], V3).
 
+vect_scalar(V, Scalar, Result) :- vect_scalar_helper(V, Scalar, [], Result).
+
+vect_scalar_helper([], _, Collector, Collector).
+vect_scalar_helper([X | Rest], Scalar, Collector, Result) :-
+  NewX is X * Scalar,
+  append(Collector, [NewX], Collector1),
+  vect_scalar_helper(Rest, Scalar, Collector1, Result).
+
 vect_mul_helper([],[], Collector, Collector).
 vect_mul_helper([X|T], [Y|T2], Collector, R) :-
   M is X*Y,
@@ -281,7 +274,6 @@ matrix_print([R, C | M]) :-
   write(R),
   write('x'),
   writeln(C),
-  writeln(''),
   print_rows(M).
 
 print_rows([]) :- writeln('').
@@ -292,10 +284,21 @@ print_rows([R | T]) :-
 print_elements([E | []]) :- writeln(E).
 print_elements([E | T]) :-
   write(E),
-  write(' '),
+  write('   '),
   print_elements(T).
 
-inverse_of_2x2([2, 2, [A, C], [B, D]], [2, 2, [D, -C], [-B, A]]).
+inverse_of_2x2([2, 2, [A, B|[]], [C, D|[]]], Inv) :-
+  det_of_2x2([2, 2, [A, B], [C, D]], Det),
+  Scalar is 1 / Det,
+  matrix_scalar([2, 2, [D, -B], [-C, A]], Scalar, Inv).
+
+matrix_scalar([R, C | Rows], Scalar, [R, C, Result]) :- matrix_scalar_helper(Rows, Scalar, [], Result).
+
+matrix_scalar_helper([], _, Collector, Collector).
+matrix_scalar_helper([Row | Rest], Scalar, Collector, Result) :-
+  vect_scalar(Row, Scalar, NewRow),
+  append(Collector, [NewRow], Collector1),
+  matrix_scalar_helper(Rest, Scalar, Collector1, Result).
 
 list_tuple([A,B,C|L], (A, R)) :- 
   R = (B, _), !, 
@@ -306,6 +309,7 @@ load_matrix(FileName, Matrix) :-
   main(FileName, LoadedFile),
   get_size(LoadedFile, R, C, Rest),
   get_rows(Rest, [], Rows),
+  !,
   append([R, C], Rows, Matrix).
 
 get_size([(R, C) | T], R, C, T).
